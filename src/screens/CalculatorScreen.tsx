@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Alert, Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Button, Platform, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { calculatePregnancyFromLMP, formatDateRU, toISODateOnly } from "../utils/pregnancy";
@@ -34,7 +34,7 @@ export function CalculatorScreen() {
   }, [cycleLength]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Калькулятор срока и ПДР</Text>
 
       <View style={styles.card}>
@@ -95,7 +95,6 @@ export function CalculatorScreen() {
                 });
                 setRecommendation(ai.recommendationText);
 
-                // 1) Всегда сохраняем локально
                 await addLocalHistory({
                   client_id: clientId,
                   created_at: new Date().toISOString(),
@@ -109,10 +108,8 @@ export function CalculatorScreen() {
                   recommendation_text: ai.recommendationText,
                 });
 
-                // 2) Если есть user — сразу upsert в Supabase (локальное потом синк очистит)
-                if (user) {
-                  requestHistorySync(user.id).catch(() => {});
-                }
+                // если юзер есть — запускаем синхронизацию в фоне
+                if (user) requestHistorySync(user.id).catch(() => {});
               } catch (e: any) {
                 Alert.alert("Ошибка", e?.message ?? "Не удалось выполнить расчёт");
               } finally {
@@ -124,7 +121,7 @@ export function CalculatorScreen() {
 
         {!user && (
           <Text style={styles.hint}>
-            Сейчас история сохраняется локально. После входа на вкладке “Аккаунт” она синхронизируется с Supabase.
+            Сейчас история сохраняется локально. После входа она автоматически синхронизируется с облаком.
           </Text>
         )}
       </View>
@@ -140,12 +137,12 @@ export function CalculatorScreen() {
           </Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, gap: 12 },
+  container: { padding: 16, gap: 12, paddingBottom: 24 },
   title: { fontSize: 18, fontWeight: "700" },
   card: { borderWidth: 1, borderColor: "#e6e6e6", borderRadius: 14, padding: 14, gap: 8 },
   label: { color: "#555" },

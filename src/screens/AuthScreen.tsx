@@ -1,3 +1,4 @@
+// src/screens/AuthScreen.tsx
 import React, { useState } from "react";
 import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuth } from "../auth/AuthContext";
@@ -42,6 +43,7 @@ export function AuthScreen() {
           <View style={styles.row}>
             <Button
               title={loading ? "..." : "Войти"}
+              disabled={loading}
               onPress={async () => {
                 try {
                   setLoading(true);
@@ -55,14 +57,12 @@ export function AuthScreen() {
             />
             <Button
               title={loading ? "..." : "Регистрация"}
+              disabled={loading}
               onPress={async () => {
                 try {
                   setLoading(true);
                   await signUp(email.trim(), password);
-                  Alert.alert(
-                    "Готово",
-                    "Если включено подтверждение email — проверь почту. Иначе можно сразу войти."
-                  );
+                  Alert.alert("Готово", "Если включено подтверждение email — проверь почту.");
                 } catch (e: any) {
                   Alert.alert("Ошибка регистрации", e?.message ?? "Не удалось зарегистрироваться");
                 } finally {
@@ -77,6 +77,7 @@ export function AuthScreen() {
           <Button
             title={loading ? "Выходим..." : "Выйти"}
             color="#b00020"
+            disabled={loading}
             onPress={async () => {
               try {
                 setLoading(true);
@@ -92,7 +93,7 @@ export function AuthScreen() {
       )}
 
       <Text style={styles.hint}>
-        История на Supabase сохраняется только для вошедшего пользователя.
+        Синхронизация выполняется автоматически при входе и при изменениях истории.
       </Text>
     </View>
   );

@@ -1,7 +1,12 @@
+// src/services/sync.ts
 import { supabase } from "../lib/supabase";
 import { clearLocalHistory, loadLocalHistory } from "../storage/localHistory";
 
-export async function syncLocalHistoryToSupabase(userId: string) {
+let inFlight: Promise<{ synced: number }> | null = null;
+let pending = false;
+let lastUserId: string | null = null;
+
+async function syncOnce(userId: string) {
   const local = await loadLocalHistory();
   if (local.length === 0) return { synced: 0 };
 
@@ -26,4 +31,29 @@ export async function syncLocalHistoryToSupabase(userId: string) {
 
   await clearLocalHistory();
   return { synced: local.length };
+}
+
+// Можно вызывать много раз — реально выполнится последовательно и без параллельных запросов
+export function requestHistorySync(userId: string) {
+  lastUserId = userId;
+  pending = true;
+
+  if (inFlight) return inFlight;
+
+  inFlight = (async () => {
+    let total = 0;
+
+    while (pending) {
+      pending = false;
+      if (!lastUserId) break;
+      const res = await syncOnce(lastUserId);
+      total += res.synced;
+    }
+
+    return { synced: total };
+  })().finally(() => {
+    inFlight = null;
+  });
+
+  return inFlight;
 }

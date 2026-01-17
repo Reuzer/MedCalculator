@@ -6,7 +6,7 @@ import { calculatePregnancyFromLMP, formatDateRU, toISODateOnly } from "../utils
 import { fetchAiRecommendation } from "../services/ai";
 import { useAuth } from "../auth/AuthContext";
 import { addLocalHistory } from "../storage/localHistory";
-import { upsertPregnancyHistory } from "../services/pregnancyHistory";
+import { requestHistorySync } from "../services/sync";
 
 function makeClientId() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -111,18 +111,7 @@ export function CalculatorScreen() {
 
                 // 2) Если есть user — сразу upsert в Supabase (локальное потом синк очистит)
                 if (user) {
-                  await upsertPregnancyHistory({
-                    user_id: user.id,
-                    client_id: clientId,
-                    lmp_date: lmpISO,
-                    cycle_length: cycleLenNumber,
-                    gest_age_days: result.gestAgeDays,
-                    weeks: result.weeks,
-                    days: result.days,
-                    trimester: result.trimester,
-                    edd_date: result.eddISO,
-                    recommendation_text: ai.recommendationText,
-                  });
+                  requestHistorySync(user.id).catch(() => {});
                 }
               } catch (e: any) {
                 Alert.alert("Ошибка", e?.message ?? "Не удалось выполнить расчёт");

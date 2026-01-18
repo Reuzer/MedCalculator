@@ -36,5 +36,12 @@
     "experiments": {
       "typedRoutes": true
     }
+  },
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
   }
 }

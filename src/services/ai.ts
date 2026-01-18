@@ -48,7 +48,7 @@ export async function fetchAiRecommendation(params: AiRecommendationParams): Pro
     `3) Сон и режим\n` +
     `4) Что нормально на этом сроке\n` +
     `5) Когда срочно к врачу\n\n` +
-    `Кратко и по делу.`;
+    `Кратко и по делу. Без маркдауна, без использования спец-символов`;
 
   const url = `${supabaseUrl}/functions/v1/openrouter-reco`;
 

@@ -14,7 +14,6 @@ export function AuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Аккаунт</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>Статус:</Text>
